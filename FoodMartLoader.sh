@@ -18,7 +18,7 @@ case $(uname) in
 esac
 
 # Setup ClassPath for libraries & drivers
-export MonClassPath="./libs/*${JFSeparator}./drivers/*"
+export MonClassPath="./libs/*${JFSeparator}./drivers/*:."
 
 # Error routine
 error() {
@@ -33,6 +33,10 @@ configureDB()	{
 	
 	case $db in
 		('') error "You must specify a database."; exit 1;;
+		(clickhouse)
+			export JDriver="-jdbcDrivers=ru.yandex.clickhouse.ClickHouseDriver"
+			export JURL="-outputJdbcURL=jdbc:clickhouse://localhost:8123/foodmart"
+			;;
 		(mysql)
 			export JDriver="-jdbcDrivers=com.mysql.jdbc.Driver"
 			export JURL="-outputJdbcURL=jdbc:mysql://localhost/foodmart"
@@ -67,7 +71,7 @@ done
 loadData()	{
 	configureDB
 	java -cp "${MonClassPath}" \
-	mondrian.test.loader.MondrianFoodMartLoader \
+	myfoodmart.MyFoodmart \
 	-inputFile=./data/FoodMartCreateData.sql \
 	${DBOptions} ${JDriver} ${JURL} ${DBCredentials}
 }
