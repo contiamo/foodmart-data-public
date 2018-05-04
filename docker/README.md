@@ -1,4 +1,4 @@
-#Foodmart Clickhouse Docker Image#
+# Foodmart Clickhouse Docker Image #
 
 This image is used in Pantheon test pipeline.
 
