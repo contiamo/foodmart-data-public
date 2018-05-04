@@ -39,7 +39,7 @@ docker run -p 8123:8123 -ti --rm --name foodmart-clickhouse --ulimit nofile=2621
 docker run -p 8123:8123 -d --name foodmart-clickhouse --ulimit nofile=262144:262144 eu.gcr.io/contiamo.com/contiamo/pantheon-db:foodmart-clickhouse
 ```
 
-## Connecting to Container with CH CLient:##
+## Connecting to Container with CH Client: ##
 
 ```bash
 docker run -it --rm --link foodmart-clickhouse:foodmart-clickhouse yandex/clickhouse-client --host foodmart-clickhouse
