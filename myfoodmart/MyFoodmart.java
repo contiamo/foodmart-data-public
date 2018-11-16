@@ -1051,7 +1051,7 @@ public class MyFoodmart {
             for (String sql : sqls) {
                 try {
                     stmt.execute(sql);
-                } catch (ClickHouseException e) {
+                } catch (com.sap.db.jdbc.exceptions.JDBCDriverException e) {
                     LOGGER.error("sql err from " + sql);
                     throw e;
                 }
@@ -2468,7 +2468,7 @@ public class MyFoodmart {
                     .append(column.typeName);
             }
 
-            buf.append(") ENGINE TinyLog");
+            buf.append(")");
 
             final String ddl = buf.toString();
             executeDDL(ddl);
@@ -2595,7 +2595,7 @@ public class MyFoodmart {
          */
         } else if (columnType == Type.Smallint) {
             if (obj instanceof Boolean) {
-                return (Boolean) obj ? "1" : "0";
+                return (Boolean) obj ? "true" : "false";
             } else {
                 try {
                     Integer result = (Integer) obj;
@@ -2743,11 +2743,13 @@ public class MyFoodmart {
          */
         } else if (column.type == Type.Boolean) {
             String trimmedValue = columnValue.trim();
-            if (trimmedValue.equals("true")) {
-                return "1";
-            } else if (trimmedValue.equals("false")) {
-                return "0";
-            }
+            if (trimmedValue.equals("1")) {
+                return "true";
+            } else if (trimmedValue.equals("0")) {
+                return "false";
+            } else {
+                return trimmedValue;
+	    }
         }
 
         return columnValue;
@@ -2837,11 +2839,7 @@ public class MyFoodmart {
 
         public void init(Dialect dialect) {
             String physType = type.toPhysical(dialect);
-            if (this.nullsAllowed) {
-                this.typeName = "Nullable(" + physType + ")";
-            } else {
-                this.typeName = physType;
-            }
+	    this.typeName = physType;
         }
     }
 
@@ -2887,23 +2885,23 @@ public class MyFoodmart {
          */
         String toPhysical(Dialect dialect) {
             if (this == Integer) {
-                return "Int32";
+                return "INTEGER";
             } else if (this == Smallint) {
-                return "Int16";
+                return "SMALLINT";
             } else if (this == Currency) {
-                return "Float32";
+                return "DECIMAL(10,4)";
             } else if (this == Varchar30 || this == Varchar60 || this == Varchar255) {
-                return "String";
+                return "VARCHAR(255)";
             } else if (this == Real) {
-                return "Float64";
+                return "REAL";
             } else if (this == Boolean) {
-                return "UInt8";
+                return "BOOLEAN";
             } else if (this == Bigint) {
-                return "Int64";
+                return "BIGINT";
             } else if (this == Date) {
-                return "Date";
+                return "DATE";
             } else if (this == Timestamp) {
-                return "DateTime";
+                return "TIMESTAMP";
             }
             throw new AssertionError("unexpected type: " + name);
         }

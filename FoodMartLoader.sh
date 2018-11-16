@@ -29,13 +29,13 @@ error() {
 # Setup database specific variables.
 configureDB()	{
 	export DBOptions="-verbose -aggregates -tables -data -indexes"
-	export DBCredentials="-outputJdbcUser=foodmart -outputJdbcPassword=foodmart"
+	export DBCredentials="-outputJdbcUser=SYSTEM -outputJdbcPassword=YDmB6vVbgUyfDT"
 	
 	case $db in
 		('') error "You must specify a database."; exit 1;;
-		(clickhouse)
-			export JDriver="-jdbcDrivers=ru.yandex.clickhouse.ClickHouseDriver"
-			export JURL="-outputJdbcURL=jdbc:clickhouse://localhost:8123/foodmart"
+		(hana)
+			export JDriver="-jdbcDrivers=com.sap.db.jdbc.Driver"
+			export JURL="-outputJdbcURL=jdbc:sap://35.242.234.121:39041/?databaseName=foodmart"
 			;;
 		(mysql)
 			export JDriver="-jdbcDrivers=com.mysql.jdbc.Driver"
