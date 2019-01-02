@@ -35,7 +35,7 @@ configureDB()	{
 		('') error "You must specify a database."; exit 1;;
 		(hana)
 			export JDriver="-jdbcDrivers=com.sap.db.jdbc.Driver"
-			export JURL="-outputJdbcURL=jdbc:sap://35.242.234.121:39041/?databaseName=foodmart"
+			export JURL="-outputJdbcURL=jdbc:sap://foodmart-hana-connect:39041/?databaseName=foodmart"
 			;;
 		(mysql)
 			export JDriver="-jdbcDrivers=com.mysql.jdbc.Driver"
