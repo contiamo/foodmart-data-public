@@ -1,0 +1,14 @@
+FROM java
+
+RUN apt update && apt install unzip -y
+
+COPY data /data
+COPY libs /libs
+COPY drivers /drivers
+COPY myfoodmart /myfoodmart
+RUN javac -cp /libs/*:/drivers/* /myfoodmart/MyFoodmart.java
+RUN unzip /data/DataScript.zip -d /data
+COPY FoodMartLoader.sh /FoodMartLoader.sh
+RUN chmod +x /FoodMartLoader.sh
+
+CMD tail -f /dev/null

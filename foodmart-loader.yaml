@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodmart-loader
+spec:
+  selector:
+    matchLabels:
+      app: foodmart-loader
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: foodmart-loader
+    spec:
+      containers:
+      - name: foodmart-loader
+        image: eu.gcr.io/dev-and-test-env/foodmart-loader:v0.0.4
