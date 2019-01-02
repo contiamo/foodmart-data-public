@@ -5,21 +5,6 @@ metadata:
 data:
   password.json: |+
     {"master_password" : "YDmB6vVbgUyfDT"}
-# ---
-# kind: PersistentVolume
-# apiVersion: v1
-# metadata:
-#   name: foodmart-hana-volume
-#   labels:
-#     type: local
-# spec:
-#   storageClassName: manual
-#   capacity:
-#     storage: 150Gi
-#   accessModes:
-#     - ReadWriteOnce
-#   hostPath:
-#     path: "/data/foodmart-hana_pv"
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
@@ -100,7 +85,6 @@ metadata:
   labels:
     app: foodmart-hana
 spec:
-  type: LoadBalancer
   ports:
   - port: 39013
     targetPort: 39013
