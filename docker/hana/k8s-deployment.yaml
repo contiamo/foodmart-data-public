@@ -1,0 +1,118 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: foodmart-hana-pass
+data:
+  password.json: |+
+    {"master_password" : "YDmB6vVbgUyfDT"}
+# ---
+# kind: PersistentVolume
+# apiVersion: v1
+# metadata:
+#   name: foodmart-hana-volume
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 150Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/data/foodmart-hana_pv"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: foodmart-hana-pvc
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodmart-hana
+  labels:
+    name: foodmart-hana
+spec:
+  selector:
+    matchLabels:
+      run: foodmart-hana
+      app: foodmart-hana
+      role: master
+      tier: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: foodmart-hana
+        app: foodmart-hana
+        role: master
+        tier: backend
+    spec:
+      initContainers:
+        - name: install
+          image: busybox
+          command: [ 'sh', '-c', 'chown 12000:79 /hana/mounts' ]
+          volumeMounts:
+            - name: foodmart-hana-data
+              mountPath: /hana/mounts
+      volumes:
+        - name: foodmart-hana-data
+          persistentVolumeClaim:
+             claimName: foodmart-hana-pvc
+        - name: foodmart-hana-config
+          configMap:
+             name: foodmart-hana-pass
+      hostname: foodmart-hana-pod
+      containers:
+      - name: foodmart-hana-container
+        image: "eu.gcr.io/dev-and-test-env/hana-db:v0.0.0"
+        ports:
+          - containerPort: 39013
+            name: port1
+          - containerPort: 39015
+            name: port2
+          - containerPort: 39017
+            name: port3
+          - containerPort: 8090
+            name: port4
+          - containerPort: 39041
+            name: port5
+          - containerPort: 59013
+            name: port6
+        args: [ "--agree-to-sap-license", "--dont-check-system", "--passwords-url", "file:///hana/foodmart-hanaconfig/password.json" ]
+        volumeMounts:
+          - name: foodmart-hana-data
+            mountPath: /hana/mounts
+          - name: foodmart-hana-config
+            mountPath: /hana/foodmart-hanaconfig
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodmart-hana-connect
+  labels:
+    app: foodmart-hana
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 39013
+    targetPort: 39013
+    name: port1
+  - port: 39015
+    targetPort: 39015
+    name: port2
+  - port: 39017
+    targetPort: 39017
+    name: port3
+  - port: 39041
+    targetPort: 39041
+    name: port5
+  selector:
+    app: foodmart-hana
