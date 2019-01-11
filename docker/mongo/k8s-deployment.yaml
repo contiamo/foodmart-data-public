@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: foodmart-mongo
-        image: "eu.gcr.io/dev-and-test-env/foodmart-mongo:v0.0.1"
+        image: "eu.gcr.io/staging-205711/foodmart-mongo:v0.0.3"
         ports:
           - containerPort: 27017
 ---
@@ -32,3 +32,5 @@ spec:
   - port: 27017
     targetPort: 39013
     name: port1
+  selector:
+    app: foodmart-mongo
