@@ -33,6 +33,12 @@ configureDB()	{
 	
 	case $db in
 		('') error "You must specify a database."; exit 1;;
+		(db2)
+		    export JDriver="-jdbcDrivers=com.ibm.db2.jcc.DB2Driver"
+		    #default DB2 credentials
+		    export DBCredentials="-outputJdbcUser=db2inst1 -outputJdbcPassword=db2inst1-pwd"
+            export JURL="-outputJdbcURL=jdbc:db2://localhost:50000/foodmart"
+            ;;
 		(mysql)
 			export JDriver="-jdbcDrivers=com.mysql.jdbc.Driver"
 			export JURL="-outputJdbcURL=jdbc:mysql://localhost/foodmart"
@@ -69,7 +75,7 @@ loadData()	{
 	java -cp "${MonClassPath}" \
 	mondrian.test.loader.MondrianFoodMartLoader \
 	-inputFile=./data/FoodMartCreateData.sql \
-	${DBOptions} ${JDriver} ${JURL} ${DBCredentials}
+	${DBOptions} ${JDriver} ${JUser} ${JPass} ${JURL} ${DBCredentials}
 }
 
 cd $(dirname $0)
