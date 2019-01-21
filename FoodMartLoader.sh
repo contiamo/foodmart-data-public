@@ -11,6 +11,8 @@
 # Sample scripts to load Mondrian's database for various databases.
 # Based on https://github.com/pentaho/mondrian/blob/master/bin/loadFoodMart.sh
 
+set -euo pipefail
+
 # Determine Java File Separator
 case $(uname) in
 	Linux|Darwin) JFSeparator=: ;;
@@ -23,7 +25,7 @@ export MonClassPath="./libs/*${JFSeparator}./drivers/*"
 # Error routine
 error() {
 	echo "Error: $1"
-	echo
+	exit 1
 }
 
 # Setup database specific variables.
@@ -59,12 +61,26 @@ configureDB()	{
 	esac
 }
 
+usage() {
+	echo "$(basename $0) - import FoodMart data set into your data source."
+	echo "Options:"
+	echo "  --db <database>   Database driver to use:"
+	echo "                     * oracle (user 'SYSTEM', password via --db-pass option);"
+	echo "                     * db2 (user 'db2inst1', password 'db2inst1-pwd');"
+	echo "                     * mysql;"
+	echo "                     * postgres;"
+	echo "                     * sqlserver;"
+	echo "                     * sybase;"
+	echo "  --db-pass <pass>  Optional string to specify DB password."
+}
+
 # Check which database is to be loaded.
 db=
 while [ $# -gt 0 ]; do
 	case "$1" in
 		(--help) usage; exit 0;;
 		(--db) shift; db="$1"; shift;;
+		(--db-pass) shift; db_pass="$1"; shift;;
 		(*) error "Unknown argument '$1'"; exit 1;;
 	esac
 done
@@ -75,7 +91,7 @@ loadData()	{
 	java -cp "${MonClassPath}" \
 	mondrian.test.loader.MondrianFoodMartLoader \
 	-inputFile=./data/FoodMartCreateData.sql \
-	${DBOptions} ${JDriver} ${JUser} ${JPass} ${JURL} ${DBCredentials}
+	${DBOptions} ${JDriver} ${JUser:-} ${JPass:-} ${JURL} ${DBCredentials}
 }
 
 cd $(dirname $0)
