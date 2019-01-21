@@ -35,10 +35,19 @@ configureDB()	{
 	
 	case $db in
 		('') error "You must specify a database."; exit 1;;
+		(oracle)
+			if [[ ! "${db_pass:-}" ]]; then
+				error "Please specify --db-pass for SYSTEM user."
+			fi
+
+			export JDriver="-jdbcDrivers=oracle.jdbc.driver.OracleDriver"
+			export DBCredentials="-outputJdbcUser=SYSTEM -outputJdbcPassword=$db_pass"
+			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//localhost:1521/XE"
+			;;
 		(db2)
 			export JDriver="-jdbcDrivers=com.ibm.db2.jcc.DB2Driver"
 			#default DB2 credentials
-			export DBCredentials="-outputJdbcUser=db2inst1 -outputJdbcPassword=db2inst1-pwd"
+			export DBCredentials="-outputJdbcUser=db2inst1 -outputJdbcPassword=${db_pass:-db2inst1-pwd}"
 			export JURL="-outputJdbcURL=jdbc:db2://localhost:50000/foodmart"
 			;;
 		(mysql)
