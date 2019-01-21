@@ -88,6 +88,7 @@ done
 # Load the database.
 loadData()	{
 	configureDB
+	unzip -n data/DataScript.zip -d data
 	java -cp "${MonClassPath}" \
 	mondrian.test.loader.MondrianFoodMartLoader \
 	-inputFile=./data/FoodMartCreateData.sql \
