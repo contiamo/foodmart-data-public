@@ -42,7 +42,7 @@ configureDB()	{
 
 			export JDriver="-jdbcDrivers=oracle.jdbc.driver.OracleDriver"
 			export DBCredentials="-outputJdbcUser=SYSTEM -outputJdbcPassword=$db_pass"
-			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//localhost:1521/XE"
+			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//localhost:1521/XEPDB1"
 			;;
 		(db2)
 			export JDriver="-jdbcDrivers=com.ibm.db2.jcc.DB2Driver"
