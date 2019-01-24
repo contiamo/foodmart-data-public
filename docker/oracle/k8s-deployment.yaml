@@ -1,0 +1,67 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: foodmart-oracle-pvc
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodmart-oracle
+  labels:
+    name: foodmart-oracle
+spec:
+  selector:
+    matchLabels:
+      app: foodmart-oracle
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: foodmart-oracle
+    spec:
+      volumes:
+        - name: foodmart-oracle-data
+          persistentVolumeClaim:
+            claimName: foodmart-oracle-pvc
+      containers:
+      - name: foodmart-oracle
+        image: "eu.gcr.io/dev-and-test-env/oracle-database:18.4.0-xe"
+        command:
+          - sh
+        args:
+          - -c
+          - 'chown oracle -R /opt/oracle/oradata &&
+            exec /opt/oracle/runOracle.sh'
+        env:
+          - name: ORACLE_PWD
+            value: "Phee1ohD"
+        ports:
+          - containerPort: 1521
+        volumeMounts:
+          - name: foodmart-oracle-data
+            mountPath: /opt/oracle/oradata
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "800m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodmart-oracle
+  labels:
+    app: foodmart-oracle
+spec:
+  ports:
+  - port: 1521
+    targetPort: 1521
+    name: oracle-net-listener
+  selector:
+    app: foodmart-oracle
