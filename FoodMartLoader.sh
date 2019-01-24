@@ -42,29 +42,29 @@ configureDB()	{
 
 			export JDriver="-jdbcDrivers=oracle.jdbc.driver.OracleDriver"
 			export DBCredentials="-outputJdbcUser=SYSTEM -outputJdbcPassword=$db_pass"
-			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//localhost:1521/XEPDB1"
+			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//${db_host}:1521/XEPDB1"
 			;;
 		(db2)
 			export JDriver="-jdbcDrivers=com.ibm.db2.jcc.DB2Driver"
 			#default DB2 credentials
 			export DBCredentials="-outputJdbcUser=db2inst1 -outputJdbcPassword=${db_pass:-db2inst1-pwd}"
-			export JURL="-outputJdbcURL=jdbc:db2://localhost:50000/foodmart"
+			export JURL="-outputJdbcURL=jdbc:db2://${db_host}:50000/foodmart"
 			;;
 		(mysql)
 			export JDriver="-jdbcDrivers=com.mysql.jdbc.Driver"
-			export JURL="-outputJdbcURL=jdbc:mysql://localhost/foodmart"
+			export JURL="-outputJdbcURL=jdbc:mysql://${db_host}/foodmart"
 			;;
 		(postgres)
 			export JDriver="-jdbcDrivers=org.postgresql.Driver"
-			export JURL="-outputJdbcURL=jdbc:postgresql://localhost/foodmart"
+			export JURL="-outputJdbcURL=jdbc:postgresql://${db_host}/foodmart"
 			;;
 		(sqlserver)
 			export JDriver="-jdbcDrivers=net.sourceforge.jtds.jdbc.Driver"
-			export JURL="-outputJdbcURL=jdbc:jtds:sqlserver://localhost/foodmart"
+			export JURL="-outputJdbcURL=jdbc:jtds:sqlserver://${db_host}/foodmart"
 			;;
 		(sybase)
 			export JDriver="-jdbcDrivers=net.sourceforge.jtds.jdbc.Driver"
-			export JURL="-outputJdbcURL=jdbc:jtds:sybase://localhost/foodmart"
+			export JURL="-outputJdbcURL=jdbc:jtds:sybase://${db_host}/foodmart"
 			;;
 		(*) error "Unknown database selection."; exit 1;;
 	esac
@@ -81,15 +81,19 @@ usage() {
 	echo "                     * sqlserver;"
 	echo "                     * sybase;"
 	echo "  --db-pass <pass>  Optional string to specify DB password."
+	echo "  --db-host <host>  Optional string to specify DB hostname."
+	echo "                     [default: localhost]"
 }
 
 # Check which database is to be loaded.
 db=
+db_host=localhost
 while [ $# -gt 0 ]; do
 	case "$1" in
 		(--help) usage; exit 0;;
 		(--db) shift; db="$1"; shift;;
 		(--db-pass) shift; db_pass="$1"; shift;;
+		(--db-host) shift; db_host="$1"; shift;;
 		(*) error "Unknown argument '$1'"; exit 1;;
 	esac
 done
