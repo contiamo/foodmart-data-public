@@ -10,6 +10,14 @@ spec:
     requests:
       storage: 50Gi
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: foodmart-oracle-credentials
+type: Opaque
+data:
+  password: UGhlZTFvaEQ=
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -41,7 +49,10 @@ spec:
             exec /opt/oracle/runOracle.sh'
         env:
           - name: ORACLE_PWD
-            value: "Phee1ohD"
+            valueFrom:
+              secretKeyRef:
+                name: foodmart-oracle-credentials
+                key: password
         ports:
           - containerPort: 1521
         volumeMounts:
