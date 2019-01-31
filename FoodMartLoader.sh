@@ -35,20 +35,26 @@ configureDB()	{
 	
 	case $db in
 		('') error "You must specify a database."; exit 1;;
+		(teradata)
+			export JDriver="-jdbcDrivers=com.teradata.jdbc.TeraDriver"
+			export DBCredentials="-outputJdbcUser=${db_user:-test} -outputJdbcPassword=${db_pass:-test}"
+			export JURL="-outputJdbcURL=jdbc:teradata://${db_host}/DBS_PORT=${db_port:-1025}"
+			;;
+
 		(oracle)
 			if [[ ! "${db_pass:-}" ]]; then
 				error "Please specify --db-pass for SYSTEM user."
 			fi
 
 			export JDriver="-jdbcDrivers=oracle.jdbc.driver.OracleDriver"
-			export DBCredentials="-outputJdbcUser=SYSTEM -outputJdbcPassword=$db_pass"
-			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//${db_host}:1521/XEPDB1"
+			export DBCredentials="-outputJdbcUser=${db_user:-SYSTEM} -outputJdbcPassword=$db_pass"
+			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//${db_host}:${db_port:-1521}/XEPDB1"
 			;;
 		(db2)
 			export JDriver="-jdbcDrivers=com.ibm.db2.jcc.DB2Driver"
 			#default DB2 credentials
-			export DBCredentials="-outputJdbcUser=db2inst1 -outputJdbcPassword=${db_pass:-db2inst1-pwd}"
-			export JURL="-outputJdbcURL=jdbc:db2://${db_host}:50000/foodmart"
+			export DBCredentials="-outputJdbcUser=${db_user:-db2inst1} -outputJdbcPassword=${db_pass:-db2inst1-pwd}"
+			export JURL="-outputJdbcURL=jdbc:db2://${db_host}:${db_port:-50000}/foodmart"
 			;;
 		(mysql)
 			export JDriver="-jdbcDrivers=com.mysql.jdbc.Driver"
@@ -88,12 +94,17 @@ usage() {
 # Check which database is to be loaded.
 db=
 db_host=localhost
+db_user=
+db_pass=
+db_port=
 while [ $# -gt 0 ]; do
 	case "$1" in
 		(--help) usage; exit 0;;
 		(--db) shift; db="$1"; shift;;
+		(--db-user) shift; db_user="$1"; shift;;
 		(--db-pass) shift; db_pass="$1"; shift;;
 		(--db-host) shift; db_host="$1"; shift;;
+		(--db-port) shift; db_port="$1"; shift;;
 		(*) error "Unknown argument '$1'"; exit 1;;
 	esac
 done
