@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yelp-clickhouse
+  labels:
+    name: yelp-clickhouse
+spec:
+  selector:
+    matchLabels:
+      app: yelp-clickhouse
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: yelp-clickhouse
+    spec:
+      containers:
+      - name: yelp-clickhouse
+        image: "eu.gcr.io/staging-205711/yelp-clickhouse:self-loading-v0.0.2"
+        ports:
+          - containerPort: 8123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yelp-clickhouse
+  labels:
+    app: yelp-clickhouse
+spec:
+  ports:
+  - port: 8123
+    targetPort: 8123
+    name: port1
+  selector:
+    app: yelp-clickhouse

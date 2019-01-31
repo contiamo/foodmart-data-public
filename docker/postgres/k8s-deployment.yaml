@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodmart-postgres
+  labels:
+    name: foodmart-postgres
+spec:
+  selector:
+    matchLabels:
+      app: foodmart-postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: foodmart-postgres
+    spec:
+      containers:
+      - name: foodmart-postgres
+        image: "eu.gcr.io/staging-205711/foodmart-postgres:v1.0.0"
+        ports:
+          - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodmart-postgres
+  labels:
+    app: foodmart-postgres
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: port1
+  selector:
+    app: foodmart-postgres

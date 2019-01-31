@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodmart-clickhouse
+  labels:
+    name: foodmart-clickhouse
+spec:
+  selector:
+    matchLabels:
+      app: foodmart-clickhouse
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: foodmart-clickhouse
+    spec:
+      containers:
+      - name: foodmart-clickhouse
+        image: "eu.gcr.io/staging-205711/foodmart-clickhouse:18.16.0"
+        ports:
+          - containerPort: 8123
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodmart-clickhouse
+  labels:
+    app: foodmart-clickhouse
+spec:
+  ports:
+  - port: 8123
+    targetPort: 8123
+    name: port1
+  selector:
+    app: foodmart-clickhouse
