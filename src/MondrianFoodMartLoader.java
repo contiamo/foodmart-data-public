@@ -813,12 +813,12 @@ public class MondrianFoodMartLoader {
 
   /** After data has been loaded from a file or via JDBC, creates any derived data. */
   private void loadFromSqlInserts() throws Exception {
-    InputStream is = getClass().getResourceAsStream("insert.sql");
+    InputStream is = getClass().getResourceAsStream("aggregations.sql");
     if (is == null) {
-      is = new FileInputStream(new File("src/test/resources/mondrian/test/loader/insert.sql"));
+      is = new FileInputStream(new File("data/aggregations.sql"));
     }
     if (is == null) {
-      throw new Exception("Cannot find insert.sql in class path");
+      throw new Exception("Cannot find aggregations.sql in data directory");
     }
     try {
       final InputStreamReader reader = new InputStreamReader(is);
