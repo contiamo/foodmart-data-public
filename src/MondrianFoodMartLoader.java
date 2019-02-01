@@ -8,10 +8,10 @@
 // Copyright (C) 2005-2017 Hitachi Vantara
 // All Rights Reserved.
 */
-package mondrian.test.loader;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.*;
 import java.text.*;
 import java.util.*;
@@ -1161,7 +1161,12 @@ public class MondrianFoodMartLoader {
    * @return FileInputStream
    */
   private InputStream openInputStream() throws Exception {
-    String defaultZipFileName = getClass().getResource("FoodMartCreateData.zip").getPath();
+    String defaultZipFileName = "FoodMartCreateData.zip";
+    URL defaultZipResource = getClass().getResource(defaultZipFileName);
+    if (defaultZipResource != null) {
+      defaultZipFileName = defaultZipResource.getPath();
+    }
+
     final String defaultDataFileName = "FoodMartCreateData.sql";
     final File file = (inputFile != null) ? new File(inputFile) : new File(defaultZipFileName);
     if (!file.exists()) {
@@ -2698,9 +2703,13 @@ public class MondrianFoodMartLoader {
 
       buf.append(")");
       switch (dialect.getDatabaseProduct()) {
+        case TERADATA:
+          buf.append(" NO PRIMARY INDEX");
+          break;
         case NEOVIEW:
           // no unique keys defined
           buf.append(" NO PARTITION");
+          break;
       }
 
       final String ddl = buf.toString();
