@@ -86,6 +86,10 @@ import org.apache.log4j.*;
  *
  * <p>See {@code bin/loadFoodMart.sh} for examples of command lines for other databases.
  *
+ * <p>Copied from Mondrian 8.3.0.0-162-RC.
+ *
+ * <p>https://github.com/pentaho/mondrian/tree/8.3.0.0-162-RC
+ *
  * @author jhyde
  * @since 23 December, 2004
  */
