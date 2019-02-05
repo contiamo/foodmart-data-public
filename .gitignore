@@ -1,2 +1,3 @@
 .DS_Store
-data/*.sql
+data/FoodMartCreateData.sql
+*.class

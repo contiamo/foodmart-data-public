@@ -13,103 +13,143 @@
 
 set -euo pipefail
 
-# Determine Java File Separator
 case $(uname) in
-	Linux|Darwin) JFSeparator=: ;;
-	*) JFSeparator=\; ;;
+	Linux|Darwin)
+		path_separator=":" ;;
+	*)
+		path_separator=";" ;;
 esac
 
-# Setup ClassPath for libraries & drivers
-export MonClassPath="./libs/*${JFSeparator}./drivers/*"
+class_paths=("libs/*" "drivers/*" "src")
+class_path=$(
+	printf "%s\n" "${class_paths[@]}" \
+		| paste -sd "$path_separator"
+)
 
-# Error routine
 error() {
-	echo "Error: $1"
+	echo "Error: $@"
 	exit 1
 }
 
-# Setup database specific variables.
-configureDB()	{
-	export DBOptions="-verbose -aggregates -tables -data -indexes"
-	export DBCredentials="-outputJdbcUser=foodmart -outputJdbcPassword=foodmart"
-	
+configure_db()	{
 	case $db in
-		('') error "You must specify a database."; exit 1;;
-		(oracle)
-			if [[ ! "${db_pass:-}" ]]; then
-				error "Please specify --db-pass for SYSTEM user."
-			fi
+		(teradata)
+			db_driver="com.teradata.jdbc.TeraDriver"
+			db_url="jdbc:teradata://${db_host}/DBS_PORT=${db_port:-1025}"
+			;;
 
-			export JDriver="-jdbcDrivers=oracle.jdbc.driver.OracleDriver"
-			export DBCredentials="-outputJdbcUser=SYSTEM -outputJdbcPassword=$db_pass"
-			export JURL="-outputJdbcURL=jdbc:oracle:thin:@//${db_host}:1521/XEPDB1"
+		(oracle)
+			db_user=${db_user:-SYSTEM}
+			db_driver="oracle.jdbc.driver.OracleDriver"
+			db_url="jdbc:oracle:thin:@//${db_host}:${db_port:-1521}/XEPDB1"
 			;;
+
 		(db2)
-			export JDriver="-jdbcDrivers=com.ibm.db2.jcc.DB2Driver"
-			#default DB2 credentials
-			export DBCredentials="-outputJdbcUser=db2inst1 -outputJdbcPassword=${db_pass:-db2inst1-pwd}"
-			export JURL="-outputJdbcURL=jdbc:db2://${db_host}:50000/foodmart"
+			db_user=${db_user:-db2inst1}
+			db_pass=${db_user:-db2inst1-pwd}
+			db_driver="com.ibm.db2.jcc.DB2Driver"
+			db_url="jdbc:db2://${db_host}:${db_port:-50000}/foodmart"
 			;;
+
 		(mysql)
-			export JDriver="-jdbcDrivers=com.mysql.jdbc.Driver"
-			export JURL="-outputJdbcURL=jdbc:mysql://${db_host}/foodmart"
+			db_driver="com.mysql.jdbc.Driver"
+			db_url="jdbc:mysql://${db_host}/foodmart"
 			;;
+
 		(postgres)
-			export JDriver="-jdbcDrivers=org.postgresql.Driver"
-			export JURL="-outputJdbcURL=jdbc:postgresql://${db_host}/foodmart"
+			db_driver="org.postgresql.Driver"
+			db_url="jdbc:postgresql://${db_host}/foodmart"
 			;;
+
 		(sqlserver)
-			export JDriver="-jdbcDrivers=net.sourceforge.jtds.jdbc.Driver"
-			export JURL="-outputJdbcURL=jdbc:jtds:sqlserver://${db_host}/foodmart"
+			db_driver="net.sourceforge.jtds.jdbc.Driver"
+			db_url="jdbc:jtds:sqlserver://${db_host}/foodmart"
 			;;
+
 		(sybase)
-			export JDriver="-jdbcDrivers=net.sourceforge.jtds.jdbc.Driver"
-			export JURL="-outputJdbcURL=jdbc:jtds:sybase://${db_host}/foodmart"
+			db_driver="net.sourceforge.jtds.jdbc.Driver"
+			db_url="jdbc:jtds:sybase://${db_host}/foodmart"
 			;;
-		(*) error "Unknown database selection."; exit 1;;
+
+		('')
+			error "You must specify a database."
+			;;
+
+		(*)
+			error "Unknown database selection."
+			;;
 	esac
+
+	if [[ ! "${db_user}" ]]; then
+		error "Please specify --db-user."
+	fi
+
+	if [[ ! "${db_pass}" ]]; then
+		error "Please specify --db-pass for ${db_user} user."
+	fi
 }
 
 usage() {
 	echo "$(basename $0) - import FoodMart data set into your data source."
 	echo "Options:"
 	echo "  --db <database>   Database driver to use:"
-	echo "                     * oracle (user 'SYSTEM', password via --db-pass option);"
-	echo "                     * db2 (user 'db2inst1', password 'db2inst1-pwd');"
+	echo "                     * oracle (default user 'SYSTEM');"
+	echo "                     * db2 (default user 'db2inst1' with password 'db2inst1-pwd');"
 	echo "                     * mysql;"
 	echo "                     * postgres;"
 	echo "                     * sqlserver;"
 	echo "                     * sybase;"
+	echo "                     * teradata;"
 	echo "  --db-pass <pass>  Optional string to specify DB password."
 	echo "  --db-host <host>  Optional string to specify DB hostname."
 	echo "                     [default: localhost]"
 }
 
-# Check which database is to be loaded.
 db=
 db_host=localhost
+db_user=
+db_pass=
+db_port=
+
 while [ $# -gt 0 ]; do
 	case "$1" in
 		(--help) usage; exit 0;;
 		(--db) shift; db="$1"; shift;;
+		(--db-user) shift; db_user="$1"; shift;;
 		(--db-pass) shift; db_pass="$1"; shift;;
 		(--db-host) shift; db_host="$1"; shift;;
+		(--db-port) shift; db_port="$1"; shift;;
 		(*) error "Unknown argument '$1'"; exit 1;;
 	esac
 done
 
-# Load the database.
-loadData()	{
-	configureDB
-	unzip -n data/DataScript.zip -d data
-	java -cp "${MonClassPath}" \
-	mondrian.test.loader.MondrianFoodMartLoader \
-	-inputFile=./data/FoodMartCreateData.sql \
-	${DBOptions} ${JDriver} ${JUser:-} ${JPass:-} ${JURL} ${DBCredentials}
+load_data()	{
+	configure_db
+
+	echo ":: extracting dataset..."
+	unzip -q -n data/DataScript.zip -d data
+
+	echo ":: compiling loader..."
+	javac -cp "${class_path}" \
+		src/MondrianFoodMartLoader.java
+
+	echo ":: starting loader..."
+	java -cp "${class_path}" \
+		-Dlog4j.configuration=file:log4j.properties \
+		MondrianFoodMartLoader \
+		-verbose \
+		-inputFile=data/FoodMartCreateData.sql \
+		-jdbcDrivers=${db_driver} \
+		-outputJdbcUser=${db_user} \
+		-outputJdbcPassword=${db_pass} \
+		-outputJdbcURL=${db_url} \
+		-tables \
+		-data \
+		-indexes
 }
 
 cd $(dirname $0)
-loadData
-exit 0
+
+load_data
 
 # vim: noet
