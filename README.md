@@ -21,6 +21,7 @@ Drivers that are included on this version are:
 - Sybase
 - DB2
 - Oracle
+- Teradata
 
 
 Pre-requistes:
@@ -33,6 +34,7 @@ Pre-requistes:
     + sybase
     + db2
     + oracle
+    + teradata
 
 Usage Instructions
 ------------------------------
