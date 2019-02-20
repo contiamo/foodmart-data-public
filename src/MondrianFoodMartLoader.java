@@ -3072,6 +3072,7 @@ public class MondrianFoodMartLoader {
         case VECTORWISE:
         case VERTICA:
         case INFORMIX:
+        case UNKNOWN: // For HANA
           if (trimmedValue.equals("true")) {
             return "1";
           } else if (trimmedValue.equals("false")) {

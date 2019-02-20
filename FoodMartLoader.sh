@@ -33,6 +33,11 @@ error() {
 
 configure_db()	{
 	case $db in
+		(hana)
+			db_driver="com.sap.db.jdbc.Driver"
+			db_url="jdbc:sap://${db_host}:${db_port:-39017}/?databaseName=foodmart"
+			;;
+
 		(teradata)
 			db_driver="com.teradata.jdbc.TeraDriver"
 			db_url="jdbc:teradata://${db_host}/DBS_PORT=${db_port:-1025}"
@@ -100,6 +105,7 @@ usage() {
 	echo "                     * sqlserver;"
 	echo "                     * sybase;"
 	echo "                     * teradata;"
+	echo "                     * hana;"
 	echo "  --db-pass <pass>  Optional string to specify DB password."
 	echo "  --db-host <host>  Optional string to specify DB hostname."
 	echo "                     [default: localhost]"
