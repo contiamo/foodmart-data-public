@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: foodmart-hana
+  labels:
+    name: foodmart-hana
+spec:
+  selector:
+    matchLabels:
+      run: foodmart-hana
+      app: foodmart-hana
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: foodmart-hana
+        app: foodmart-hana
+    spec:
+      hostname: hana-db-server
+      containers:
+      - name: foodmart-hana-container
+        image: "eu.gcr.io/dev-and-test-env/foodmart-hana:v1.0.0"
+        ports:
+          - containerPort: 39013
+            name: port1
+          - containerPort: 39015
+            name: port2
+          - containerPort: 39017
+            name: port3
+          - containerPort: 8090
+            name: port4
+          - containerPort: 39041
+            name: port5
+          - containerPort: 59013
+            name: port6
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: foodmart-hana-connect
+  labels:
+    app: foodmart-hana
+spec:
+  ports:
+  - port: 39013
+    targetPort: 39013
+    name: port1
+  - port: 39015
+    targetPort: 39015
+    name: port2
+  - port: 39017
+    targetPort: 39017
+    name: port3
+  - port: 39041
+    targetPort: 39041
+    name: port5
+  selector:
+    app: foodmart-hana
