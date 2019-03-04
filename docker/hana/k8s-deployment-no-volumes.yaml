@@ -18,9 +18,18 @@ spec:
         app: foodmart-hana
     spec:
       hostname: hana-db-server
+      nodeSelector:
+        group: pantheon
       containers:
       - name: foodmart-hana-container
         image: "eu.gcr.io/dev-and-test-env/foodmart-hana:v1.0.0"
+        readinessProbe:
+          tcpSocket:
+            port: 39041
+          initialDelaySeconds: 180
+          periodSeconds: 30
+          failureThreshold: 5
+          successThreshold: 1
         ports:
           - containerPort: 39013
             name: port1
