@@ -23,7 +23,7 @@ esac
 class_paths=("libs/*" "drivers/*" "src")
 class_path=$(
 	printf "%s\n" "${class_paths[@]}" \
-		| paste -sd "$path_separator"
+		| paste -sd "$path_separator" -
 )
 
 error() {
