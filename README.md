@@ -41,10 +41,8 @@ Usage Instructions
 Run the script as follows:
 
 ```
-./FoodMartLoader.sh --db <db_type> [--db-host <db_host>] [--db-pass <db_pass>]
+./FoodMartLoader.sh --db <db_type> [--db-host <db_host>] [--db-user <db_user>] [--db-pass <db_pass>]
 ```
-
-`--db-pass` is supported only for DB2 and Oracle DB.
 
 In case of Oracle DB loader will load data into Pluggable DB (PDB) under name
 `XEPDB1`, which is default PDB name for official Oracle Docker image.

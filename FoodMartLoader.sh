@@ -81,11 +81,11 @@ configure_db()	{
 	esac
 
 	if [[ ! "${db_user}" ]]; then
-		error "Please specify --db-user."
+		error "Need to specify --db-user for a ${db} database."
 	fi
 
 	if [[ ! "${db_pass}" ]]; then
-		error "Please specify --db-pass for ${db_user} user."
+		error "Need to specify --db-pass for ${db_user} user for a ${db} database."
 	fi
 }
 
@@ -100,6 +100,7 @@ usage() {
 	echo "                     * sqlserver;"
 	echo "                     * sybase;"
 	echo "                     * teradata;"
+	echo "  --db-user <user>  Optional string to specify DB username."
 	echo "  --db-pass <pass>  Optional string to specify DB password."
 	echo "  --db-host <host>  Optional string to specify DB hostname."
 	echo "                     [default: localhost]"
