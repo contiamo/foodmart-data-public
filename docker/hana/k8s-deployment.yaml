@@ -1,22 +1,3 @@
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: foodmart-hana-pass
-data:
-  password.json: |+
-    {"master_password" : "YDmB6vVbgUyfDT"}
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: foodmart-hana-pvc
-spec:
-  storageClassName: standard
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 50Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,40 +5,32 @@ metadata:
   name: foodmart-hana
   labels:
     name: foodmart-hana
+    ci: pantheon
 spec:
   selector:
     matchLabels:
       run: foodmart-hana
       app: foodmart-hana
-      role: master
-      tier: backend
   replicas: 1
   template:
     metadata:
       labels:
         run: foodmart-hana
         app: foodmart-hana
-        role: master
-        tier: backend
     spec:
-      initContainers:
-        - name: install
-          image: busybox
-          command: [ 'sh', '-c', 'chown 12000:79 /hana/mounts' ]
-          volumeMounts:
-            - name: foodmart-hana-data
-              mountPath: /hana/mounts
-      volumes:
-        - name: foodmart-hana-data
-          persistentVolumeClaim:
-             claimName: foodmart-hana-pvc
-        - name: foodmart-hana-config
-          configMap:
-             name: foodmart-hana-pass
-      hostname: foodmart-hana-pod
+      hostname: hana-db-server
+      nodeSelector:
+        group: pantheon
       containers:
       - name: foodmart-hana-container
-        image: "eu.gcr.io/dev-and-test-env/hana-db:v0.0.0"
+        image: "eu.gcr.io/dev-and-test-env/foodmart-hana:v2.0.0"
+        readinessProbe:
+          tcpSocket:
+            port: 39044
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          failureThreshold: 30
+          successThreshold: 1
         ports:
           - containerPort: 39013
             name: port1
@@ -71,19 +44,17 @@ spec:
             name: port5
           - containerPort: 59013
             name: port6
-        args: [ "--agree-to-sap-license", "--dont-check-system", "--passwords-url", "file:///hana/foodmart-hanaconfig/password.json" ]
-        volumeMounts:
-          - name: foodmart-hana-data
-            mountPath: /hana/mounts
-          - name: foodmart-hana-config
-            mountPath: /hana/foodmart-hanaconfig
+          - containerPort: 39044
+            name: foodmart-db-port
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: foodmart-hana-connect
+  name: foodmart-hana
   labels:
     app: foodmart-hana
+    ci: pantheon
 spec:
   ports:
   - port: 39013
@@ -98,5 +69,9 @@ spec:
   - port: 39041
     targetPort: 39041
     name: port5
+  - port: 39044
+    targetPort: 39044
+    name: foodmart-db-port
+
   selector:
     app: foodmart-hana

@@ -74,6 +74,13 @@ configure_db()	{
 			db_url="jdbc:jtds:sybase://${db_host}/foodmart"
 			;;
 
+		(hana)
+			db_driver="com.sap.db.jdbc.Driver"
+			db_url="jdbc:sap://${db_host}:39044/?databaseName=foodmart"
+			db_user=pantheon
+			db_pass=YDmB6vVbgUyfDT
+			;;
+
 		('')
 			error "You must specify a database."
 			;;
