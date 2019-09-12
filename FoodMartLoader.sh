@@ -65,8 +65,6 @@ configure_db()	{
 			db_driver="net.sourceforge.jtds.jdbc.Driver"
 			db_url="jdbc:jtds:sqlserver://${db_host}/foodmart"
 			# sqlserver has strict password requirements
-			db_user=foodmart
-			db_pass=F00dmartpass
 			;;
 
 		(sybase)
